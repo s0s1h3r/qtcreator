@@ -16,6 +16,9 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <widget class="QLineEdit" name="lineEdit_search"/>
+    </item>
+    <item>
      <widget class="QTextEdit" name="textEdit"/>
     </item>
    </layout>

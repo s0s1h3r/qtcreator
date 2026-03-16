@@ -7,6 +7,7 @@
 #include <sstream> // для std::stringstream (разбиение строк)
 #include <string> //для std::string
 #include <QString>
+#include "csvreader.h"
 
 //функция, которая объясняет, как сортировать фильмы
 bool compareByYear (const Movie& a, const Movie& b) {
@@ -20,50 +21,29 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this); //Qt отрисовывает окошко
 
-    std::vector<Movie> library; //создаем пустую библиотеку(вектор)
-    std::ifstream file("movie.csv"); //открываем файл средствами чистого c++
-
-    //проверяяем удалось ли открыть файл
-    if (!file.is_open()) {
-
+    CsvReader reader("movie.csv"); //просим csvreader прочесть файл
+    std::vector<Movie> library = reader.readData();
+    if (library.empty()) {
         ui->textEdit->setText("ты ошибсяя, беда, переделая всё");
-        return; //завершаем программу с кодом ошибки (1)
+        return;
+    } else{
+        //СОРТИРОВКА
+        std::sort(library.begin(), library.end(), compareByYear);
+        displayMovies(library);
     }
+}
 
-    std::string line; //сюда будем считывать строку целиком
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
 
-    //читаем файл построчно, пока не закончится
-    while (std::getline(file, line)) {
-        //создаем строковый поток из прочитанной строки, это нужно, чтобы резать её
-        std::stringstream ss(line);
+void MainWindow::displayMovies(const std::vector<Movie>& moviesToDisplay) {
+    //выводим фильм на экран
+    ui->textEdit->clear();
+    ui->textEdit->append("--- список ---");
 
-        std::string title;
-        std::string screenwriter;
-        std::string director;
-        std::string yearStr;
-
-
-        //режим строку по разделителю
-        if (std::getline(ss, title, ';') &&
-            std::getline(ss, screenwriter, ';') &&
-            std::getline(ss, director, ';') &&
-            std::getline(ss, yearStr, ';'))
-        {
-            int year = std::stoi(yearStr);
-
-            Movie newMovie(title, screenwriter, director, year); //создаем фильм
-            library.push_back(newMovie); //кладем фильм в библиотеку
-        }
-    }
-
-    file.close(); //закрываем файл
-
-    //СОРТИРОВКА
-    std::sort(library.begin(), library.end(), compareByYear);
-
-    //выводим результат на экран
-    ui->textEdit->append("--- отсортированные фильмы ---");
-    for (const Movie& movie : library) {
+    for (const Movie& movie : moviesToDisplay) {
         QString outputLine = QString("Название: %1 | Сценарист: %2  | Режиссер: %3 | Год: %4")
                                  .arg(QString::fromStdString(movie.getTitle()))
                                  .arg(QString::fromStdString(movie.getScreenwriter()))
@@ -73,8 +53,35 @@ MainWindow::MainWindow(QWidget *parent)
     }
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
+//живой поиск
+void MainWindow::on_lineEdit_search_textChanged(const QString &arg1) {
+
+    std::string query = arg1.toStdString();
+
+    CsvReader reader("movie.csv"); //так как нет кэша открываем еще раз
+    std::vector<Movie> currentLibrary = reader.readData();
+
+    std::sort(currentLibrary.begin(), currentLibrary.end(), compareByYear);
+    if (query.empty()) {
+        displayMovies(currentLibrary);
+        return;
+    }
+
+    //ищем совпадения
+    std::vector<Movie> searchResults;
+
+    for (const Movie& movie : currentLibrary) {
+        if (movie.getTitle().find(query) != std::string::npos) {
+            searchResults.push_back(movie);
+        }
+    }
+
+    //выводим результат
+    if (searchResults.empty()) {
+        ui->textEdit->setText("ищи сам, я не справляюсь");
+    } else {
+        displayMovies(searchResults);
+    }
 }
+
 

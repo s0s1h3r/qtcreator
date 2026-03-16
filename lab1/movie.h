@@ -14,7 +14,13 @@ private:
 public:
     //конструктор - это функция, которая вызывается при рождение объекта
     Movie(std::string t = "", std::string s = "", std::string d = "", int y = 0);
+    Movie() {
+        title = "неизвестно";
+        screenwriter = "неизвестно";
+        director = "неизвестно";
+        year = 0;
 
+    }
     //геттеры - публичные кнопки, чтобы только ЧИТАТЬ  данные
     std::string getTitle() const;
     std::string getScreenwriter() const;
