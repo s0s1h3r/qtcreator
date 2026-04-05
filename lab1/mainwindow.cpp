@@ -8,6 +8,7 @@
 #include <string> //для std::string
 #include <QString>
 #include "csvreader.h"
+#include "csvwriter.h"
 
 //функция, которая объясняет, как сортировать фильмы
 bool compareByYear (const Movie& a, const Movie& b) {
@@ -31,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
         std::sort(library.begin(), library.end(), compareByYear);
         displayMovies(library);
     }
+
+    //добавление
+
 }
 
 MainWindow::~MainWindow()
@@ -85,3 +89,23 @@ void MainWindow::on_lineEdit_search_textChanged(const QString &arg1) {
 }
 
 
+
+void MainWindow::on_button_search_clicked()
+{
+    CsvReader reader("movie.csv");
+    std::vector<Movie> currentLibrary = reader.readData();
+
+    //создаем новый фильм
+    Movie testMovie("matrica", "ne znay", "ne znay2", 1999);
+    currentLibrary.push_back(testMovie);//добавляем его
+    std::sort(currentLibrary.begin(), currentLibrary.end(), compareByYear);//сортировка
+
+    //вызываем писателя и сохраняем наш новый фильм
+    CsvWriter writer("movie.csv");
+    if (writer.writeData(currentLibrary)) {
+        ui->textEdit->append("film dobavlen");
+        displayMovies(currentLibrary);
+    } else {
+        ui->textEdit->append("film ne dobavlen:( :( :(");
+    }
+}

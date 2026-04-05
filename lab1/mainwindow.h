@@ -18,6 +18,8 @@ public:
     ~MainWindow();
 private slots:
     void on_lineEdit_search_textChanged(const QString &arg1); //слот для поиска
+    void on_button_search_clicked();
+
 private:
     Ui::MainWindow *ui;
 
