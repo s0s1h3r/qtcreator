@@ -97,9 +97,8 @@ void MainWindow::on_button_search_clicked()
     std::vector<Movie> currentLibrary = reader.readData();
 
     //получаем данные из строки и добавляем
-    QStringList p = ui->lineEdit_search->text().split(';');
-    currentLibrary.emplace_back(p[0].toStdString(), p[1].toStdString(),
-                     p[2].toStdString(), p[3].toInt());
+    currentLibrary.emplace_back(ui->lineEdit_title->text().toStdString(), ui->lineEdit_director->text().toStdString(),
+                     ui->lineEdit_genre->text().toStdString(), ui->lineEdit_year->text().toInt());
 
     std::sort(currentLibrary.begin(), currentLibrary.end(), compareByYear);//сортировка
 
